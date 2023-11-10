@@ -1,0 +1,152 @@
+Joel Rojas
+Lab 8
+
+We continued Step 3 of the previous labs>
+Definitions
+Class 0= No Public Work
+Class 1- Public Work (Stable)
+1. Data Preperation
+We combined the education levels "educ_college" and "educ_advdeg" to create a new variable "BA_plus", this variable indicates wether individuals have atleast a college education.
+
+2. OLS Models
+We then estimated an OLS model using "public_work_num" as the dependent variable, with its interactions with female, age and having a college education.
+
+The dataset was split into male and female subsets and seperate OLS modesl are estimated for each and compared with the full model.
+
+Results
+Entire Model
+Call:
+lm(formula = public_work_num ~ female + BA_plus + AGE + I(female * 
+    BA_plus) + I(AGE * female), data = dat_use)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.4382 -0.2640 -0.1268 -0.1265  0.8735 
+
+Coefficients:
+                      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)          1.261e-01  5.738e-03  21.968   <2e-16 ***
+female              -7.514e-02  8.391e-03  -8.955   <2e-16 ***
+BA_plus              1.374e-01  1.675e-03  82.064   <2e-16 ***
+AGE                  1.863e-05  1.744e-04   0.107    0.915    
+I(female * BA_plus)  8.341e-02  2.396e-03  34.813   <2e-16 ***
+I(AGE * female)      4.142e-03  2.549e-04  16.250   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4053 on 482972 degrees of freedom
+Multiple R-squared:  0.06428,	Adjusted R-squared:  0.06427 
+F-statistic:  6635 on 5 and 482972 DF,  p-value: < 2.2e-16
+
+female subset
+summary(model_lpm_v1f)
+
+Call:
+lm(formula = public_work_num ~ BA_plus + AGE, data = dat_use_female)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.4382 -0.3800 -0.1841  0.5743  0.8451 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 0.050919   0.006619   7.692 1.45e-14 ***
+BA_plus     0.220861   0.001852 119.223  < 2e-16 ***
+AGE         0.004161   0.000201  20.702  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4382 on 225542 degrees of freedom
+Multiple R-squared:  0.06137,	Adjusted R-squared:  0.06136 
+F-statistic:  7373 on 2 and 225542 DF,  p-value: < 2.2e-16
+
+male subset
+Call:
+lm(formula = public_work_num ~ BA_plus + AGE, data = dat_use_male)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.2642 -0.2640 -0.1267 -0.1266  0.8735 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 1.261e-01  5.296e-03  23.801   <2e-16 ***
+BA_plus     1.374e-01  1.546e-03  88.910   <2e-16 ***
+AGE         1.863e-05  1.610e-04   0.116    0.908    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3741 on 257430 degrees of freedom
+Multiple R-squared:  0.02981,	Adjusted R-squared:  0.0298 
+F-statistic:  3955 on 2 and 257430 DF,  p-value: < 2.2e-16
+
+Interpretation: The subset models are simpler and easier to interpret than the entire model but they lack the diffrent relationships by gender that are present in the entire model. 
+
+3. Random Forest
+
+I took a random sample of 10,000 observations from the data as i was having issues using the entire data set. The importnce and proximity options where set to calculate the variable importance and proximity.
+
+After fitting, the model was summary was printed, the variable importance scores where rounded and plotted. Predictions where maded on the test set and a confusion matrix was generated.
+
+Results
+Model
+Call:
+ randomForest(formula = as.factor(pub_work) ~ ., data = data_sample,      importance = TRUE, proximity = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 12
+
+        OOB estimate of  error rate: 22.58%
+Confusion matrix:
+     0   1 class.error
+0 7616 128  0.01652893
+1 2130 126  0.94414894
+
+Interpretation: The Random Forst used an ensemble of 500 decisions trees to make its predictions and at each split 12 variables were randomly chosen as candidates for splitting.
+
+The Out-of-Bag Error rate is 22.58%
+
+The model has a very low class error for type 0 and very high class error for class 1. This means that model is biased towards predicting for class 0 which could mean that their may be a class imbalance in the dataset.
+
+Predictions from Test Data
+pred_model1 <- predict(model_randFor,  s_dat_test)
+> table(pred = pred_model1, true = dat_test$pub_work)
+    true
+pred      0      1
+   0 330408  92625
+   1   5776   5842
+
+Interpretation: This model is also very effective at predicting class 0 compared to class 1, with a high number of true negatives and low number of false positives. 
+
+4. Support Vector Machines
+We then ran an SVM, due to performance issues i also used a 10,000 random sample of both the data and test data samples.
+
+Results:
+true
+pred    0    1
+   0 7157 2163
+   1  539  141
+Interpretation: This model is also better at predicing class 0 compared to class 1.
+
+Comparison: Random Forrest vs SVM
+Random Forrest seems to perform better at identifying both classes (0,1).
+
+Academic Paper 1
+NFL Analysis: Spend by Position and the Impact on Team Performance
+David Levy
+
+The paper utilized publicly accessible data from Spotrac.com for salary cap information and pro-football-reference.com for win/loss statistics. The data, which covered the years 2013-2018, was scraped using Scrapy and cleaned with Python, focusing on active player contributions by excluding "Dead Cap" spend. It aimed to correlate positional spending with team win percentage. The study found no significant variance in spending allocation or correlation with wins. The questions addressed centered on whether and how positional spending impacts team performance, with future research poised to explore regression analyses for a deeper understanding of these dynamics​.
+
+Academic Paper 2
+OVERCONFIDENCE VS. MARKET EFFICIENCY
+IN THE NATIONAL FOOTBALL LEAGUE
+Cade Massey
+Richard H. Thaler
+NATIONAL BUREAU OF ECONOMIC RESEARCH
+
+This paperexamines the valuation of draft picks by NFL teams in light of psychological and economic theory. The authors review decision-making biases, estimate market values of draft picks using a dataset of 276 draft day trades, and analyze the steep decline in player compensation in relation to draft order. They conduct an econometric analysis to determine whether high draft picks are economically justified, using regression models with position fixed-effects to estimate player performance value based on the market prices of free agents. This methodological approach allows the authors to calculate the surplus value generated by players drafted in various positions, leading to the conclusion that late-first-round picks offer more value than early ones, challenging the rationality of current NFL team draft strategies.
+
+
+
+
+
